@@ -32,7 +32,7 @@ func HashPassword(password string) string {
 }
 
 func VerifyPassword(userPassword, providedPassword string) (bool, string) {
-	err := bcrypt.CompareHashAndPassword([]byte(providedPassword),[]byte(userPassword))
+	err := bcrypt.CompareHashAndPassword([]byte(userPassword), []byte(providedPassword))
 	check := true
 	msg := ""
 	if err != nil {
@@ -79,6 +79,7 @@ func Signup() gin.HandlerFunc{
 
 		if count > 0 {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "this email or phone number already exists"})
+			return
 		}
 
 		user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -97,11 +98,13 @@ func Signup() gin.HandlerFunc{
 
 		resultInsertionNumber, err := userCollection.InsertOne(ctx, user)
 		if err != nil {
+			log.Printf("Database insertion error: %v", err)
 			msg := fmt.Sprintf("user item was not created")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 			return
 		}
 
+		log.Printf("User created successfully: %v", resultInsertionNumber.InsertedID)
 		c.JSON(http.StatusOK, resultInsertionNumber)
 	}
 }
@@ -124,7 +127,7 @@ func Login() gin.HandlerFunc{
 			return
 		}
 
-		isValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
+		isValid, msg := VerifyPassword(*foundUser.Password, *user.Password)
 
 		if isValid != true {
 			c.JSON(http.StatusInternalServerError, gin.H{"error":msg})

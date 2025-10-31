@@ -27,6 +27,10 @@ type SignedDetails struct {
 var userCollection *mongo.Collection = database.OpenCollection(database.Client, "user")
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
+func init() {
+	log.Printf("SECRET_KEY loaded: '%s' (length: %d)", SECRET_KEY, len(SECRET_KEY))
+}
+
 
 func GenerateAllTokens(email string, firstName string, lastName string, uid string, userType string) (signedToken string, signedRefreshToken string, err error) {
 	claims := &SignedDetails{
@@ -46,13 +50,13 @@ func GenerateAllTokens(email string, firstName string, lastName string, uid stri
 		},
 	}
 
-	signedToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(SECRET_KEY)
+	signedToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	signedRefreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString(SECRET_KEY)
+	signedRefreshToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 		return

@@ -19,6 +19,10 @@ func DBInstance() *mongo.Client {
 		log.Fatal("Error loading the .env file")
 	}
 	MongoDB := os.Getenv("MONGO_URL")
+	log.Printf("MongoDB URL: '%s'", MongoDB)
+	if MongoDB == "" {
+		log.Fatal("MONGO_URL environment variable is empty")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(MongoDB))
