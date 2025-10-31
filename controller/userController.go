@@ -208,7 +208,7 @@ func GetUsers() gin.HandlerFunc{
 	}
 }
 
-func GetUser(userId string) gin.HandlerFunc {
+func GetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := c.Param("user_id")
 		if err :=helpers.MatchUserTypeToUid(c, userId); err != nil {

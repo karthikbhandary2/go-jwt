@@ -84,3 +84,24 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 		return
 	}
 }
+
+func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
+	token, err := jwt.ParseWithClaims(signedToken, &SignedDetails{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(SECRET_KEY), nil
+		},
+	)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	claims, ok := token.Claims.(*SignedDetails)
+	if !ok {
+		log.Println("the token is invalid")
+		return 
+	}
+	if claims.ExpiresAt < time.Now().Local().Unix() {
+		log.Println("Token expired")
+		return
+	}
+	return claims, ""
+}
